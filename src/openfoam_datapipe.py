@@ -32,22 +32,29 @@ import vtk
 from physicsnemo.utils.domino.utils import *
 from torch.utils.data import Dataset
 
-# AIR_DENSITY = 1.205
-# STREAM_VELOCITY = 30.00
+# AIR_DENSITY = 1
+# STREAM_VELOCITY = 1
 
 
-class DriveSimPaths:
+class AhmedBodyPaths:
+    @staticmethod
+    def _get_index(car_dir: Path) -> str:
+        """Extract run number from directory name like 'run_1'"""
+        return car_dir.name.split('_')[1]
+    
     @staticmethod
     def geometry_path(car_dir: Path) -> Path:
-        return car_dir / "body.stl"
+        run_id = AhmedBodyPaths._get_index(car_dir)
+        return car_dir / f"ahmed_{run_id}.stl"
 
     @staticmethod
     def volume_path(car_dir: Path) -> Path:
-        return car_dir / "VTK/simpleFoam_steady_3000/internal.vtu"
+        return None  # No volume data for Ahmed body
 
     @staticmethod
     def surface_path(car_dir: Path) -> Path:
-        return car_dir / "VTK/simpleFoam_steady_3000/boundary/aero_suv.vtp"
+        run_id = AhmedBodyPaths._get_index(car_dir)
+        return car_dir / f"boundary_{run_id}.vtp"
 
 
 class DrivAerAwsPaths:
@@ -100,11 +107,16 @@ class OpenFoamDataset(Dataset):
 
         self.data_path = data_path
 
-        supported_kinds = ["drivesim", "drivaer_aws"]
+        supported_kinds = ["drivesim", "drivaer_aws", "ahmed_body"]
         assert kind in supported_kinds, (
             f"kind should be one of {supported_kinds}, got {kind}"
         )
-        self.path_getter = DriveSimPaths if kind == "drivesim" else DrivAerAwsPaths
+        if kind == "ahmed_body":
+            self.path_getter = AhmedBodyPaths
+        elif kind == "drivesim":
+            self.path_getter = DriveSimPaths
+        else:
+            self.path_getter = DrivAerAwsPaths
 
         assert self.data_path.exists(), f"Path {self.data_path} does not exist"
 

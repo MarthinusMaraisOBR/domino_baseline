@@ -18,12 +18,12 @@
 # │            Project Details                │
 # └───────────────────────────────────────────┘  
 project: # Project name
-  name: AWS_Dataset
+  name: ahmed_baseline
   
 exp_tag: 1 # Experiment tag
 # Main output directory.
-project_dir: outputs/${project.name}/
-output: outputs/${project.name}/${exp_tag}
+project_dir: /workspace/outputs/${project.name}/
+output: /workspace/outputs/${project.name}/${exp_tag}
 
 hydra: # Hydra config
   run:
@@ -36,11 +36,11 @@ resume_dir: ${output}/models
 # ┌───────────────────────────────────────────┐
 # │            Data Preprocessing             │
 # └───────────────────────────────────────────┘  
-data_processor: # Data processor configurable parameters
-  kind: drivaer_aws # must be either drivesim or drivaer_aws
-  output_dir: /user/aws_data_all/
-  input_dir: /data/drivaer_aws/drivaer_data_full/
-  cached_dir: /user/cached/drivaer_aws/drivaer_data_full/
+data_processor:
+  kind: ahmed_body  # Custom type for Ahmed body
+  output_dir: /workspace/outputs/processed/surface_fine/
+  input_dir: /workspace/ahmed_data/organized/
+  cached_dir: /workspace/outputs/cached/surface_fine/
   use_cache: false
   num_processors: 12
 
@@ -51,8 +51,8 @@ variables:
   surface:
     solution:
       # The following is for AWS DrivAer dataset.
-      pMeanTrim: scalar
-      wallShearStressMeanTrim: vector
+      pMean: scalar
+      wallShearStressMean: vector
   volume:
     solution:
       # The following is for AWS DrivAer dataset.
@@ -62,23 +62,25 @@ variables:
   global_parameters:
     inlet_velocity:
       type: vector
-      reference: [38.89] # vector [30, 0, 0] should be specified as [30], while [30, 30, 0] should be [30, 30].
+      reference: [1] # vector [30, 0, 0] should be specified as [30], while [30, 30, 0] should be [30, 30].
     air_density:
       type: scalar
-      reference: 1.226
+      reference: 1
 
 # ┌───────────────────────────────────────────┐
 # │          Training Data Configs            │
 # └───────────────────────────────────────────┘  
 data: # Input directory for training and validation data
-  input_dir: /user/data/aws_data_all/
-  input_dir_val: /user/data/aws_data_all_val/
+  #input_dir: /user/data/aws_data_all/
+  #input_dir_val: /user/data/aws_data_all_val/
+  input_dir: /workspace/outputs/processed/surface_fine/train/
+  input_dir_val: /workspace/outputs/processed/surface_fine/val/
   bounding_box: # Bounding box dimensions for computational domain
-    min: [-3.5, -2.25, -0.32]
-    max: [8.5, 2.25, 3.00]
+    min: [-4, -1, 0]
+    max: [6, 1, 1.4]
   bounding_box_surface: # Bounding box dimensions for car surface
-    min: [-1.1, -1.2, -0.32]
-    max: [4.5, 1.2, 1.3]
+    min: [-1.5, -0.4, 0.0]
+    max: [1.0, 0.4, 0.5]
   gpu_preprocessing: true
   gpu_output: true
 
@@ -94,7 +96,7 @@ domain_parallelism:
 # │          Model Parameters                 │
 # └───────────────────────────────────────────┘  
 model:
-  model_type: combined # train which model? surface, volume, combined
+  model_type: surface # train which model? surface, volume, combined
   activation: "relu" # "relu" or "gelu"
   loss_function: 
     loss_type: "mse" # mse or rmse
@@ -105,7 +107,7 @@ model:
   volume_points_sample: 8192 # Number of points to sample in volume per epoch
   surface_points_sample: 8192 # Number of points to sample on surface per epoch
   surface_sampling_algorithm: area_weighted #random or area_weighted
-  geom_points_sample: 300_000 # Number of points to sample on STL per epoch
+  geom_points_sample: 70_000 # Number of points to sample on STL per epoch
   num_neighbors_surface: 7 # How many neighbors on surface?
   num_neighbors_volume: 10 # How many neighbors on volume?
   combine_volume_surface: false # combine volume and surface encodings
@@ -173,15 +175,15 @@ model:
 # │          Training Configs                 │
 # └───────────────────────────────────────────┘  
 train: # Training configurable parameters
-  epochs: 1000
-  checkpoint_interval: 1
+  epochs: 500
+  checkpoint_interval: 10
   dataloader:
     batch_size: 1
     pin_memory: false # if the preprocessing is outputing GPU data, set this to false
   sampler:
     shuffle: true
     drop_last: false
-  checkpoint_dir: /user/models/ # Use only for retraining
+  checkpoint_dir: /user/models/ # Use only for retraining, nothing done at the moment
   add_physics_loss: false
 
 
@@ -200,9 +202,9 @@ val: # Validation configurable parameters
 # │          Testing data Configs             │
 # └───────────────────────────────────────────┘  
 eval: # Testing configurable parameters
-  test_path: /user/testing_data # Dir for testing data in raw format (vtp, vtu ,stls)
-  save_path: /user/predicted_data # Dir to save predicted results in raw format (vtp, vtu)
-  checkpoint_name: DoMINO.0.455.pt # Name of checkpoint to select from saved checkpoints
-  scaling_param_path: /user/scaling_params
+  test_path: /workspace/ahmed_data/organized/test/fine/ # Dir for testing data in raw format (vtp, vtu ,stls)
+  save_path:  /workspace/outputs/predictions/surface_fine/ # Dir to save predicted results in raw format (vtp, vtu)
+  checkpoint_name: best_model.pt # Name of checkpoint to select from saved checkpoints
+  scaling_param_path: /workspace/outputs/${project.name}/
   refine_stl: False # Automatically refine STL during inference
   stencil_size: 7 # Stencil size for evaluating surface and volume model
