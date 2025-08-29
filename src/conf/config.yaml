@@ -110,6 +110,7 @@ model:
   geom_points_sample: 70_000 # Number of points to sample on STL per epoch
   num_neighbors_surface: 7 # How many neighbors on surface?
   num_surface_neighbors: 7
+  surface_neighbors: 7
   num_neighbors_volume: 10 # How many neighbors on volume?
   combine_volume_surface: false # combine volume and surface encodings
   return_volume_neighbors: true # Whether to return volume neighbors or not
