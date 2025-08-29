@@ -172,6 +172,7 @@ model:
     fourier_features: false
     num_modes: 5
     activation: ${model.activation}
+    scaling_params: null  # Add this line
 
 # ┌───────────────────────────────────────────┐
 # │          Training Configs                 │
