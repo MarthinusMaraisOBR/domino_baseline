@@ -135,6 +135,7 @@ model:
       surface_radii: [0.01, 0.05, 1.0] # radii for surface
       surface_hops: 1 # Number of surface iterations
       volume_hops: 1 # Number of volume iterations
+      hops: 1  # ADD THIS LINE
       volume_neighbors_in_radius: [10, 10, 10, 10] # Number of neighbors in radius for volume
       surface_neighbors_in_radius: [10, 10, 10] # Number of neighbors in radius for surface
       fourier_features: false
