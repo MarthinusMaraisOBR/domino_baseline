@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+build/
+dist/
+*.egg-info/
+
+# PyTorch models
+*.pth
+*.pkl
+*.pt
+
+# ML Training artifacts
+outputs/
+logs/
+checkpoints/
+wandb/
+lightning_logs/
+
+# Data files
+*.npy
+*.npz
+*.h5
+data/
+datasets/
+
+# Configuration overrides
+*.local.yaml
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Temporary files
+*.tmp
+*.log
