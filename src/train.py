@@ -901,7 +901,7 @@ def main(cfg: DictConfig) -> None:
         input_features=3,
         output_features_vol=num_vol_vars,
         output_features_surf=num_surf_vars,
-        global_features=num_global_features,
+        # global_features=num_global_features,
         model_parameters=cfg.model,
     ).to(dist.device)
     model = torch.compile(model, disable=True)  # TODO make this configurable
