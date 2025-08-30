@@ -363,7 +363,7 @@ def main(cfg: DictConfig):
     model = torch.compile(model, disable=True)
 
     checkpoint = torch.load(
-        to_absolute_path(os.path.join(cfg.resume_dir, cfg.eval.checkpoint_name)),
+        "/workspace/outputs/ahmed_baseline/1/models/DoMINO.0.499.pt",
         map_location=dist.device,
     )
 
