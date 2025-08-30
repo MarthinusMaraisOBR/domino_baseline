@@ -458,7 +458,7 @@ def main(cfg: DictConfig):
             cp.asarray(mesh_indices_flattened).astype(cp.int32),
             cp.asarray(surf_grid_reshaped).astype(cp.float32),
             use_sign_winding_number=True,
-            return_cupy=False,
+            # return_cupy=False,
         ).reshape(nx, ny, nz)
 
         surf_grid = np.float32(surf_grid)
