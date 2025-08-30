@@ -369,7 +369,7 @@ def main(cfg: DictConfig):
         input_features=3,
         output_features_vol=num_vol_vars,
         output_features_surf=num_surf_vars,
-        global_features=global_features,
+        # global_features=global_features,
         model_parameters=cfg.model,
     ).to(dist.device)
 
