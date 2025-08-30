@@ -376,7 +376,7 @@ def main(cfg: DictConfig):
     model = torch.compile(model, disable=True)
 
     checkpoint = torch.load(
-        to_absolute_path(os.path.join(cfg.resume_dir, cfg.eval.checkpoint_name)),
+        "/workspace/outputs/ahmed_baseline/1/models/DoMINO.0.499.pt",
         map_location=dist.device,
     )
 
@@ -412,14 +412,14 @@ def main(cfg: DictConfig):
     for count, dirname in enumerate(dirnames_per_gpu):
         filepath = os.path.join(input_path, dirname)
         tag = int(re.findall(r"(\w+?)(\d+)", dirname)[0][1])
-        stl_path = os.path.join(filepath, f"drivaer_{tag}.stl")
+        stl_path = os.path.join(filepath, f"ahmed_{tag}.stl")
         vtp_path = os.path.join(filepath, f"boundary_{tag}.vtp")
-        vtu_path = os.path.join(filepath, f"volume_{tag}.vtu")
+        # vtu_path = os.path.join(filepath, f"volume_{tag}.vtu")
 
         vtp_pred_save_path = os.path.join(
             pred_save_path, f"boundary_{tag}_predicted.vtp"
         )
-        vtu_pred_save_path = os.path.join(pred_save_path, f"volume_{tag}_predicted.vtu")
+        # vtu_pred_save_path = os.path.join(pred_save_path, f"volume_{tag}_predicted.vtu")
 
         # Read STL
         reader = pv.get_reader(stl_path)

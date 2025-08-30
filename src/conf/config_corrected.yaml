@@ -1,0 +1,191 @@
+project:
+  name: ahmed_baseline
+exp_tag: 1
+project_dir: /workspace/outputs/${project.name}/
+output: /workspace/outputs/${project.name}/${exp_tag}
+hydra:
+  run:
+    dir: ${output}
+  output_subdir: hydra
+resume_dir: ${output}/models
+data_processor:
+  kind: ahmed_body
+  output_dir: /workspace/outputs/processed/surface_fine/
+  input_dir: /workspace/ahmed_data/organized/
+  cached_dir: /workspace/outputs/cached/surface_fine/
+  use_cache: false
+  num_processors: 12
+variables:
+  surface:
+    solution:
+      pMean: scalar
+      wallShearStressMean: vector
+  volume:
+    solution:
+      UMeanTrim: vector
+      pMeanTrim: scalar
+      nutMeanTrim: scalar
+  global_parameters:
+    inlet_velocity:
+      type: vector
+      reference:
+      - 1
+    air_density:
+      type: scalar
+      reference: 1
+data:
+  input_dir: /workspace/outputs/processed/surface_fine/train/
+  input_dir_val: /workspace/outputs/processed/surface_fine/val/
+  bounding_box:
+    min:
+    - -4
+    - -1
+    - 0
+    max:
+    - 6
+    - 1
+    - 1.4
+  bounding_box_surface:
+    min:
+    - -1.5
+    - -0.4
+    - 0.0
+    max:
+    - 1.0
+    - 0.4
+    - 0.5
+  gpu_preprocessing: true
+  gpu_output: true
+domain_parallelism:
+  domain_size: 1
+  shard_grid: false
+  shard_points: false
+model:
+  model_type: surface
+  activation: relu
+  loss_function:
+    loss_type: mse
+    area_weighing_factor: 10000
+  interp_res:
+  - 128
+  - 64
+  - 64
+  use_sdf_in_basis_func: true
+  positional_encoding: false
+  volume_points_sample: 0
+  surface_points_sample: 8192
+  surface_sampling_algorithm: area_weighted
+  geom_points_sample: 70000
+  num_neighbors_surface: 7
+  num_surface_neighbors: 7
+  surface_neighbors: 7
+  num_neighbors_volume: 10
+  combine_volume_surface: false
+  return_volume_neighbors: true
+  use_surface_normals: true
+  use_surface_area: true
+  integral_loss_scaling_factor: 100
+  normalization: min_max_scaling
+  encode_parameters: false
+  surf_loss_scaling: 5.0
+  vol_loss_scaling: 1.0
+  geometry_encoding_type: both
+  solution_calculation_mode: two-loop
+  resampling_surface_mesh:
+    resample: false
+    points: 1000000
+  geometry_rep:
+    geo_conv:
+      base_neurons: 32
+      base_neurons_in: 1
+      base_neurons_out: 1
+      volume_radii:
+      - 0.1
+      - 0.5
+      - 1.0
+      - 2.5
+      surface_radii:
+      - 0.01
+      - 0.05
+      - 1.0
+      surface_hops: 1
+      volume_hops: 1
+      hops: 1
+      volume_neighbors_in_radius:
+      - 10
+      - 10
+      - 10
+      - 10
+      surface_neighbors_in_radius:
+      - 10
+      - 10
+      - 10
+      fourier_features: false
+      num_modes: 5
+      activation: ${model.activation}
+    geo_processor:
+      base_filters: 8
+      activation: ${model.activation}
+      processor_type: conv
+      self_attention: false
+      cross_attention: false
+  nn_basis_functions:
+    base_layer: 512
+    fourier_features: true
+    num_modes: 5
+    activation: ${model.activation}
+  local_point_conv:
+    activation: ${model.activation}
+  aggregation_model:
+    base_layer: 512
+    activation: ${model.activation}
+  position_encoder:
+    base_neurons: 512
+    activation: ${model.activation}
+    fourier_features: true
+    num_modes: 5
+  geometry_local:
+    volume_neighbors_in_radius:
+    - 64
+    - 128
+    surface_neighbors_in_radius:
+    - 32
+    - 128
+    volume_radii:
+    - 0.1
+    - 0.25
+    surface_radii:
+    - 0.05
+    - 0.25
+    base_layer: 512
+  parameter_model:
+    base_layer: 512
+    fourier_features: false
+    num_modes: 5
+    activation: ${model.activation}
+    scaling_params: null
+train:
+  epochs: 500
+  checkpoint_interval: 10
+  dataloader:
+    batch_size: 1
+    pin_memory: false
+  sampler:
+    shuffle: true
+    drop_last: false
+  checkpoint_dir: /user/models/
+  add_physics_loss: false
+val:
+  dataloader:
+    batch_size: 1
+    pin_memory: false
+  sampler:
+    shuffle: true
+    drop_last: false
+eval:
+  test_path: /workspace/ahmed_data/organized/test/fine/
+  save_path: /workspace/outputs/predictions/surface_fine/
+  checkpoint_name: best_model.pt
+  scaling_param_path: /workspace/outputs/${project.name}/
+  refine_stl: false
+  stencil_size: 7
